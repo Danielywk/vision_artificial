@@ -1,0 +1,35 @@
+import cv2
+import os
+import imutils
+
+personName = 'ANDREA PIÑA'
+dataPath = '/Users/isa/Pictures/Reconocimiento/Data'  # Cambia a la ruta donde hayas almacenado Data
+personPath = dataPath + '/' + personName
+if not os.path.exists(personPath):
+    print('Carpeta creada: ', personPath)
+    os.makedirs(personPath)
+# cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture('/Users/isa/Pictures/Reconocimiento/VIDEOSR/ricardo1.mp4')
+eyeClassif = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')
+count = 408
+
+while True:
+
+    ret, frame = cap.read()
+    if ret == False: break
+    frame = imutils.resize(frame, width=320)
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    auxFrame = frame.copy()
+    eyes = eyeClassif.detectMultiScale(gray, 1.3, 5)
+    for (x, y, w, h) in eyes:
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        ojos = auxFrame[y:y + h, x:x + w]
+        ojos = cv2.resize(ojos, (150, 150), interpolation=cv2.INTER_CUBIC)
+        cv2.imwrite(personPath + '/rostro_{}.jpg'.format(count), ojos)
+        count = count + 1
+    cv2.imshow('frame', frame)
+    k = cv2.waitKey(1)
+    if k == 27 or count >= 600:
+        break
+cap.release()
+cv2.destroyAllWindows()
